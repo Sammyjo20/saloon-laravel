@@ -2,8 +2,13 @@
 
 namespace Sammyjo20\SaloonLaravel\Tests;
 
+use Laravel\Telescope\Telescope;
+use Illuminate\Support\Collection;
+use Laravel\Telescope\Storage\EntryModel;
 use Sammyjo20\SaloonLaravel\Facades\Saloon;
+use Laravel\Telescope\TelescopeServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use Laravel\Telescope\Contracts\EntriesRepository;
 use Sammyjo20\SaloonLaravel\SaloonServiceProvider;
 
 class TestCase extends BaseTestCase
@@ -12,7 +17,20 @@ class TestCase extends BaseTestCase
     {
         return [
             SaloonServiceProvider::class,
+            TelescopeServiceProvider::class,
         ];
+    }
+
+    /**
+     * Define database migrations.
+     *
+     * @return void
+     */
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadMigrationsFrom(__DIR__ . '/../vendor/laravel/telescope/database/migrations');
+
+        $this->artisan('migrate');
     }
 
     /**
@@ -27,5 +45,17 @@ class TestCase extends BaseTestCase
         return [
             'Saloon' => Saloon::class,
         ];
+    }
+
+    /**
+     * Load the Telescope entries.
+     *
+     * @return Collection
+     */
+    protected function loadTelescopeEntries(): Collection
+    {
+        Telescope::store(app(EntriesRepository::class));
+
+        return EntryModel::all();
     }
 }
